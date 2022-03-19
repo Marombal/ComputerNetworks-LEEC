@@ -20,11 +20,11 @@
         00000011 (0x03) in Commands sent by the Transmitter and Answers sent by the Receiver
         00000001 (0x01) in Commands sent by the Receiver and Answers sent by the Transmitter
     C)
-        C (Control fiels) ¨C Defines the type of frame and carries the sequence numbers
+        C (Control fiels) Â¨C Defines the type of frame and carries the sequence numbers
         N(s) in I frames and N(r) in S frames (RR, REJ)
     BCC)
-        BCC (Block Check Character) ¨C Provides error control based on an octet that
-        guarantees that there is an even pair of 1¡¯s (even parity) for each bit position,
+        BCC (Block Check Character) Â¨C Provides error control based on an octet that
+        guarantees that there is an even pair of 1Â¡Â¯s (even parity) for each bit position,
         considering all octets protected by the BCC (header or data) and the BCC
         (before stuffing)
 */
@@ -75,7 +75,7 @@ int main(int argc, char** argv)
 
   /* 
     VTIME e VMIN devem ser alterados de forma a proteger com um temporizador a 
-    leitura do(s) próximo(s) caracter(es)
+    leitura do(s) prÃ³ximo(s) caracter(es)
   */
 
 
@@ -109,11 +109,11 @@ int main(int argc, char** argv)
     
     //res2 = select(1, 2, NULL, NULL, &5)  
     //multiple_timerc()
-    
+    //codigo
 
 
   /* 
-    O ciclo WHILE deve ser alterado de modo a respeitar o indicado no guião 
+    O ciclo WHILE deve ser alterado de modo a respeitar o indicado no guiÃ£o 
   */
 
 
