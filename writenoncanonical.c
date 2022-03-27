@@ -21,14 +21,14 @@ int main(int argc, char** argv)
     struct termios oldtio,newtio;
     char buf[255];
     int i, sum = 0, speed = 0;
-   
+/*   
     if ( (argc < 2) ||
       ((strcmp("/dev/ttyS0", argv[1])!=0) &&
        (strcmp("/dev/ttyS1", argv[1])!=0) )) {
       printf("Usage:\tnserial SerialPort\n\tex: nserial /dev/ttyS1\n");
       exit(1);
     }
-
+*/
 
   /*
     Open serial port device for reading and writing and not as controlling tty
@@ -59,7 +59,7 @@ int main(int argc, char** argv)
 
   /*
     VTIME e VMIN devem ser alterados de forma a proteger com um temporizador a
-    leitura do(s) próximo(s) caracter(es)
+    leitura do(s) prÃ³ximo(s) caracter(es)
   */
 
 
@@ -72,21 +72,18 @@ int main(int argc, char** argv)
     }
 
     printf("New termios structure set\n");
-       //char *str= gets();
-       //printf("%s", str);
-        gets(buf);
-        puts(buf);
-      // for(int n =0; n<(strlen(str)+1); n++)
-      //{ buf[n]=str[n];}
-        buf[(strlen(buf)+1)] = '\0';
+    gets(buf);//puts(buf);
+    buf[(strlen(buf)+1)] = '\0';
+    
+    printf("A string lida do teclado foi: %s\n", buf);
    
     res = write(fd,buf,(strlen(buf)+1));  
     printf("%d bytes written\n", res);
  
 
   /*
-    O ciclo FOR e as instruções seguintes devem ser alterados de modo a respeitar
-    o indicado no guião
+    O ciclo FOR e as instruÃ§Ãµes seguintes devem ser alterados de modo a respeitar
+    o indicado no guiÃ£o
   */
 
 // depois de escrever e enviar -> leio o que o recetor enviou 
@@ -102,12 +99,11 @@ int main(int argc, char** argv)
       aux++;
       
       if (buf[0]=='\0') STOP=TRUE;
-      
+      //printf("\n");
     }
-    puts(string);
-    
-    res = write(fd, string, (strlen(string)+1));
-    
+    //puts(string);
+    //res = write(fd, string, (strlen(string)+1));
+    printf("A string recebida do recetor foi: %s\n", string);
 
 
    
