@@ -7,11 +7,47 @@
 #include <termios.h>
 #include <stdio.h>
 
+#include <unistd.h>
+#include <signal.h>
+
 #define BAUDRATE B38400
 #define MODEMDEVICE "/dev/ttyS1"
 #define _POSIX_SOURCE 1 /* POSIX compliant source */
 #define FALSE 0
 #define TRUE 1
+
+#define FLAG 0x7e
+#define A_1 0x03
+#define A_2 0x01
+#define C 0x03
+#define BCC_1 A_1^C
+#define BCC_2 A_2^C
+
+
+
+#define STATE0 0 // Start
+#define STATE1 1 // Flag RCV
+#define STATE2 2 // A RCV
+#define STATE3 3 // C RCV
+#define STATE4 4 // BCC OK
+#define STATE5 5 // STOP
+
+int n_timeouts=0, flag=1;
+void timeout()                   // atende alarme
+{
+	printf("timeout #%d...\n", (n_timeouts+1));
+	flag=1;
+	n_timeouts++;
+}
+
+
+/*
+while(conta < 4){
+   if(flag){
+      alarm(3);                 // activa alarme de 3s
+      flag=0;
+   }
+*/
 
 volatile int STOP=FALSE;
 
@@ -53,7 +89,7 @@ int main(int argc, char** argv)
     newtio.c_lflag = 0;
 
     newtio.c_cc[VTIME]    = 0;   /* inter-character timer unused */
-    newtio.c_cc[VMIN]     = 1;   /* blocking read until 1 chars received */
+    newtio.c_cc[VMIN]     = 0;   /* blocking read until 1 chars received */
 
 
 
@@ -72,41 +108,92 @@ int main(int argc, char** argv)
     }
 
     printf("New termios structure set\n");
-    gets(buf);//puts(buf);
-    buf[(strlen(buf)+1)] = '\0';
+
+    unsigned char SET[] = {FLAG, A_1, C, BCC_1, FLAG}; // Definição do SET segundo o protocolo
     
-    printf("A string lida do teclado foi: %s\n", buf);
-   
-    res = write(fd,buf,(strlen(buf)+1));  
+    /* Envio do set atravez da função write */
+    res = write(fd,SET,5); 
     printf("%d bytes written\n", res);
+    printf("SET (enviado): (0x%02X)(0x%02X)(0x%02X)(0x%02X)(0x%02X)\n", SET[0], SET[1], SET[2], SET[3], SET[4]);
  
+    /*
+      ### Variaveis auxiliares ao while ###
 
-  /*
-    O ciclo FOR e as instruções seguintes devem ser alterados de modo a respeitar
-    o indicado no guião
-  */
+      aux - para determinar o indice do vetor 
+      para - para determinar o fim da mensagem (na segunda flag)
+      AUX - vetor onde se guardara a mensagem
+      AUX_1 - onde se vai guardar a leitura que é feita 1 de cada vez
+    */
 
-// depois de escrever e enviar -> leio o que o recetor enviou 
-
-
-    char string[255];
-    int aux = 0;
-    while (STOP==FALSE) {       /* loop for input */
+    int aux = 0, para = 0;
+    unsigned char AUX[255], AUX_1;
+    int STATE = 0, contador = 0;
+    
+    (void) signal(SIGALRM, timeout);  // instala  rotina que atende interrupcao
+    
+    while (STOP==FALSE) /* loop for input */
+    {       
+      if((n_timeouts<3)&&(STATE!=STATE5)){
+        if(flag){
+          alarm(3);
+          flag = 0;
+          if(n_timeouts!=0){           // after 1st timeout
+            res = write(fd,SET,5);    // send SET again
+            //printf("Reenvio #%d\n", n_timeouts); 
+          }
+        }
+      }
+      else{
+        STOP=TRUE;
+        alarm(0);
+      }
       
-      res = read(fd,buf,1);   //puts(buf);
+      res = read(fd,&AUX_1,1);
       
-      string[aux] = buf[0];
-      aux++;
+      AUX[STATE] = AUX_1;
       
-      if (buf[0]=='\0') STOP=TRUE;
-      //printf("\n");
+      switch(STATE)
+      {
+        case (STATE0):
+            if(AUX_1 == FLAG) STATE = STATE1;
+            else STATE = STATE0;
+            break;
+        case (STATE1):
+            if(AUX_1 == A_2) STATE = STATE2;
+            else if(AUX_1 == FLAG) STATE = STATE1;
+            else STATE = STATE0;
+            break;
+        case (STATE2):
+            if(AUX_1 == C) STATE = STATE3;
+            else if(AUX_1 == FLAG) STATE = STATE1;
+            else STATE = STATE0;
+            break;
+        case (STATE3):
+            if(AUX_1 == BCC_2) STATE = STATE4;
+            else if(AUX_1 == FLAG) STATE = STATE1;
+            else STATE = STATE0;
+            break;
+        case (STATE4):
+            if(AUX_1 == FLAG) STATE = STATE5;
+            else STATE = STATE0;
+            break;
+      }  
+      
+      if (STATE == STATE5)
+      { 
+        STOP = TRUE;
+        para = 1;
+        contador = 0;
+      }
     }
-    //puts(string);
-    //res = write(fd, string, (strlen(string)+1));
-    printf("A string recebida do recetor foi: %s\n", string);
 
-
-   
+    if(n_timeouts>=3){
+      printf("Failed to start conection...\n");
+    }
+    if(STATE==STATE5){
+      printf("UA (recebido): (0x%02X)(0x%02X)(0x%02X)(0x%02X)(0x%02X)\n", AUX[0], AUX[1], AUX[2], AUX[3], AUX[4]);
+    }
+    
     if ( tcsetattr(fd,TCSANOW,&oldtio) == -1) {
       perror("tcsetattr");
       exit(-1);

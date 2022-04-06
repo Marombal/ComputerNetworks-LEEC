@@ -13,6 +13,23 @@
 #define FALSE 0
 #define TRUE 1
 
+#define FLAG 0x7e
+#define A_1 0x03
+#define A_2 0x01
+#define C 0x03
+#define BCC_1 A_1^C
+#define BCC_2 A_2^C
+
+
+
+#define STATE0 0 // Start
+#define STATE1 1 // Flag RCV
+#define STATE2 2 // A RCV
+#define STATE3 3 // C RCV
+#define STATE4 4 // BCC OK
+#define STATE5 5 // STOP
+
+
 /*  
     FLAG)
         All frames are delimited by flags (01111110)
@@ -27,6 +44,8 @@
         guarantees that there is an even pair of 1¡¯s (even parity) for each bit position,
         considering all octets protected by the BCC (header or data) and the BCC
         (before stuffing)
+    SET = [FLAG, A, C, BCC, FLAG]
+    UA = [FLAG, A, C, BCC, FLAG]
 */
 
 
@@ -69,7 +88,7 @@ int main(int argc, char** argv)
     newtio.c_lflag = 0;
 
     newtio.c_cc[VTIME]    = 0;   /* inter-character timer unused */
-    newtio.c_cc[VMIN]     = 1;   /* blocking read until 5 chars received */
+    newtio.c_cc[VMIN]     = 0;   /* blocking read until 5 chars received */
 
 
 
@@ -88,34 +107,62 @@ int main(int argc, char** argv)
 
     printf("New termios structure set\n");
     
-    char string[255];
+    unsigned char UA[] = {FLAG, A_2, C, BCC_2, FLAG}; // Definição do UA segundo o protocolo
     
-    int aux = 0, res2;
-    
-    while (STOP==FALSE) {       /* loop for input */
-      
-      res = read(fd,buf,1);   //puts(buf);
-      //printf("aqui5\n");
-      string[aux] = buf[0];
-      aux++;
-      
-      if (buf[0]=='\0') STOP=TRUE;
-      //printf("\n");
+    int STATE = 0;
+    /*
+      ### Variaveis auxiliares ao while ###
+
+      aux - para determinar o indice do vetor 
+      para - para determinar o fim da mensagem (na segunda flag)
+      AUX - vetor onde se guardara a mensagem
+      AUX_1 - onde se vai guardar a leitura que é feita 1 de cada vez
+    */
+
+    unsigned char AUX[255], AUX_1;
+    int aux = 0, para = 0;
+
+    while (STOP==FALSE) /* loop for input */ 
+    {        
+      res = read(fd,&AUX_1,1);
+      AUX[STATE] = AUX_1;
+      //printf("AUX: %02X STATE: %d \n", AUX[STATE], STATE);
+      switch(STATE)
+      {
+        case (STATE0):
+            if(AUX_1 == FLAG) STATE = STATE1;
+            else STATE = STATE0;
+            break;
+        case (STATE1):
+            if(AUX_1 == A_1) STATE = STATE2;
+            else if(AUX_1 == FLAG) STATE = STATE1;
+            else STATE = STATE0;
+            break;
+        case (STATE2):
+            if(AUX_1 == C) STATE = STATE3;
+            else if(AUX_1 == FLAG) STATE = STATE1;
+            else STATE = STATE0;
+            break;
+        case (STATE3):
+            if(AUX_1 == BCC_1) STATE = STATE4;
+            else if(AUX_1 == FLAG) STATE = STATE1;
+            else STATE = STATE0;
+            break;
+        case (STATE4):
+            if(AUX_1 == FLAG) STATE = STATE5;
+            else STATE = STATE0;
+            break;
+      }
+
+
+      if (STATE == STATE5) STOP = TRUE;
     }
-    //printf("str:%s tam:%d\n", buf, res);
-    //puts(string);
-    printf("A string recebida do emissor foi: %s\n", string);
-    
-    string[0] = ('!'); // para testar 
-    printf("A string enviada para o emissor foi: %s\n", string);
+    printf("SET (Recebido): (0x%02X)(0x%02X)(0x%02X)(0x%02X)(0x%02X)\n", AUX[0], AUX[1], AUX[2], AUX[3], AUX[4]);
 
-
-    res = write(fd, string, (strlen(string)+1));
-
-
-  /* 
-    O ciclo WHILE deve ser alterado de modo a respeitar o indicado no guião 
-  */
+    /* Envio do UA de modo a confirmar a receção do SET */
+    //sleep(5); // <--- tests
+    res = write(fd, UA, 5);
+    printf("UA (enviado): (0x%02X)(0x%02X)(0x%02X)(0x%02X)(0x%02X)\n", UA[0], UA[1], UA[2], UA[3], UA[4]);
 
 
 
