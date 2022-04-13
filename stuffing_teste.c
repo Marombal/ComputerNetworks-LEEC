@@ -14,25 +14,42 @@
 
 int stuffing(char* buf, int size);
 int destuffing(char* buf, int size);
-int setupFrameFormat(char* buf, int size);
+int setupFrameFormat(char* buf, char* frame, int size);
 int resetFrameFormat(char* buf, int size);
 void imprime(char* buf, int size);
 
 int main(){
     char buf[50] = "123~12}}3"; // strlen-1 = 7
     int res, res1;
+    char frame[TAM_MAX];
     
+    printf("Start: ");
     imprime(buf, strlen(buf));
 
-    //setupFrameFormat(buf, strlen(buf));
-    
-    res = stuffing(buf, (strlen(buf)));
-    
-    imprime(buf, res);
+    res = setupFrameFormat(buf, frame, strlen(buf));
 
-    res = destuffing(buf, (strlen(buf)));
+    printf("sFrame: ");
+    imprime(frame, res);
+    
+    res = stuffing(frame, res);
+    printf("Stuff: ");   
+    imprime(frame, res);
 
-    imprime(buf, res);
+    res = destuffing(frame, res);
+    printf("dStuf: ");
+    imprime(frame, res);
+
+    res = resetFrameFormat(frame, res);
+    printf("Final: ");
+    imprime(frame, res);
+
+    for(int i = 0; i < res; i++){
+        if(buf[i]!=frame[i]){
+            printf("\nERROR. Strat!=Final\n");
+            return -1;
+        }
+    }
+    printf("\nSUCESS (START = FINAL, as expected)\n\n");
 }
 
 
@@ -41,11 +58,11 @@ int stuffing(char* buf, int size){
     
     char aux1, aux2;
 
-    for(int i = 0; i < size; i++){
+    for(int i = 3; i < size; i++){
         if(buf[i] == ESC){
             size++;
             aux1 = buf[i+1];
-            buf[i+1] = ESC^XOR;    //this should be 0x5e
+            buf[i+1] = (ESC^XOR);    //this should be 0x5e
             for(int j = i+2; j <= size ;j++){
                 aux2 = buf[j];
                 buf[j]=aux1;
@@ -54,12 +71,12 @@ int stuffing(char* buf, int size){
         }
     }
 
-    for(int i = 0; i<size; i++){
+    for(int i = 3; i<size; i++){
         if(buf[i] == FLAG){
             buf[i]=ESC;
             size++;
             aux1=buf[i+1];
-            buf[i+1]=FLAG^XOR;  //this should be 
+            buf[i+1]=(FLAG^XOR);  //this should be 
             for(int j = i+2; j<=size; j++){
                 aux2 = buf[j];
                 buf[j]=aux1;
@@ -96,9 +113,9 @@ int destuffing(char* buf, int size){
     return size;
 }
 
-int setupFrameFormat(char* buf, int size){
+int setupFrameFormat(char* buf, char* frame, int size){
     if((!buf)||(size<0)) return -1;
-    char frame[TAM_MAX];
+    //char frame[TAM_MAX];
     frame[0] = FLAG;
     frame[1] = A_1;
     frame[2] = C;
@@ -109,7 +126,7 @@ int setupFrameFormat(char* buf, int size){
     frame[size + 4] = BCC_2;
     frame[size + 5] = FLAG;
 
-    imprime(frame, size+6);
+    //imprime(frame, size+6);
     return size+6;
 }
 
@@ -120,9 +137,9 @@ int resetFrameFormat(char* buf, int size){
     for(int i = 0; i < size; i++){
         buf[i] = buf[i+4];
     }
-    size - 4;
+    size = size - 4;
     /* Tirar o final da */
-    size - 2;
+    size = size - 2;
 
     return size;
 }
@@ -130,7 +147,7 @@ int resetFrameFormat(char* buf, int size){
 
 void imprime(char* buf, int size){
     if((!buf)||(size < 0)) return;
-    printf("Init_Hex:");
+    //printf("Init_Hex:");
     for(int i = 0; i < size; i++){
         printf(" 0x%02X ", buf[i]);
     }
