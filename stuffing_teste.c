@@ -19,12 +19,12 @@ int resetFrameFormat(char* buf, int size);
 void imprime(char* buf, int size);
 
 int main(){
-    char buf[50] = "123~123"; // strlen-1 = 7
+    char buf[50] = "123~12}}3"; // strlen-1 = 7
     int res, res1;
     
     imprime(buf, strlen(buf));
 
-    setupFrameFormat(buf, strlen(buf));
+    //setupFrameFormat(buf, strlen(buf));
     
     res = stuffing(buf, (strlen(buf)));
     
@@ -75,14 +75,14 @@ int destuffing(char* buf, int size){
 
     for(int i = 0; i < size; i++){
         if(buf[i] == ESC){
-            if(buf[i+1] == FLAG^XOR){
-                for(int j = i; j < size; j++){
+            if(buf[i+1] == (FLAG^XOR)){//printf("a%0X", buf[i+1]);
+                for(int j = i; j < size; j++){                
                     buf[j] = buf[j+1];
                 }
                 size--;
                 buf[i] = FLAG;
             }
-            else if(buf[i+1] == ESC^XOR){
+            else if(buf[i+1] == (ESC^XOR)){//printf("b%0X", buf[i+1]);
                 for(int j = i; j < size; j++){
                     buf[j] = buf[j+1];
                 }
