@@ -5,8 +5,8 @@
 #define A_1 0x03
 #define A_2 0x01
 #define C 0x03
-#define BCC_1 A_1^C
-#define BCC_2 A_2^C
+#define BCC_1 (A_1^C)
+#define BCC_2 (A_2^C)
 #define ESC 0x7d
 #define XOR 0x20
 
