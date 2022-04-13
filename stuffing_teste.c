@@ -9,18 +9,27 @@
 #define XOR 0x20
 
 int stuffing(char* buf, int size);
+int destuffing(char* buf, int size);
 
 int main(){
-    char buf[50] = "123~123"; // 
+    char buf[50] = "123~123"; // strlen-1 = 7
     int res;
-    printf("%ld\nInit_Char: %s\n",(strlen(buf)), buf);
+    //printf("%ld\nInit_Char: %s\n",(strlen(buf)), buf);
     printf("Init_Hex:");
     for(int i = 0; i < strlen(buf); i++){
         printf(" 0x%02X ", buf[i]);
     }
     printf("\n");
     res = stuffing(buf, (strlen(buf)));
-    printf("%ld\nInit_Char: %s\n",(strlen(buf)), buf);
+    //printf("%ld\nInit_Char: %s\n",(strlen(buf)), buf);
+    printf("Init_Hex:");
+    for(int i = 0; i < strlen(buf); i++){
+        printf(" 0x%02X ", buf[i]);
+    }
+    printf("\n");
+
+    res = destuffing(buf, (strlen(buf)));
+
     printf("Init_Hex:");
     for(int i = 0; i < strlen(buf); i++){
         printf(" 0x%02X ", buf[i]);
@@ -30,7 +39,7 @@ int main(){
 
 int stuffing(char* buf, int size){
     if((!buf)||(size<0)) return -1;
-    int act_size = size;
+    
     char aux1, aux2;
 
     for(int i = 0; i < size; i++){
@@ -57,6 +66,32 @@ int stuffing(char* buf, int size){
                 buf[j]=aux1;
                 aux1=aux2;
             }
+        }
+    }
+    return size;
+}
+
+int destuffing(char* buf, int size){
+    if((!buf)||(size<0)) return -1;
+
+    for(int i = 0; i < size; i++){
+        if(buf[i] == ESC){
+            if(buf[i+1] == FLAG^XOR){
+                for(int j = i; j < size; j++){
+                    buf[j] = buf[j+1];
+                }
+                size--;
+                buf[i] = FLAG;
+            }
+            else if(buf[i+1] == ESC^XOR){
+                for(int j = i; j < size; j++){
+                    buf[j] = buf[j+1];
+                }
+                size--;
+                buf[i] = ESC;
+            }
+            else{
+                return -1;}
         }
     }
     return size;
