@@ -5,37 +5,36 @@
 #define A_1 0x03
 #define A_2 0x01
 #define C 0x03
+#define BCC_1 A_1^C
+#define BCC_2 A_2^C
 #define ESC 0x7d
 #define XOR 0x20
 
+#define TAM_MAX 50
+
 int stuffing(char* buf, int size);
 int destuffing(char* buf, int size);
+int setupFrameFormat(char* buf, int size);
+int resetFrameFormat(char* buf, int size);
+void imprime(char* buf, int size);
 
 int main(){
     char buf[50] = "123~123"; // strlen-1 = 7
-    int res;
-    //printf("%ld\nInit_Char: %s\n",(strlen(buf)), buf);
-    printf("Init_Hex:");
-    for(int i = 0; i < strlen(buf); i++){
-        printf(" 0x%02X ", buf[i]);
-    }
-    printf("\n");
+    int res, res1;
+    
+    imprime(buf, strlen(buf));
+
+    setupFrameFormat(buf, strlen(buf));
+    
     res = stuffing(buf, (strlen(buf)));
-    //printf("%ld\nInit_Char: %s\n",(strlen(buf)), buf);
-    printf("Init_Hex:");
-    for(int i = 0; i < strlen(buf); i++){
-        printf(" 0x%02X ", buf[i]);
-    }
-    printf("\n");
+    
+    imprime(buf, res);
 
     res = destuffing(buf, (strlen(buf)));
 
-    printf("Init_Hex:");
-    for(int i = 0; i < strlen(buf); i++){
-        printf(" 0x%02X ", buf[i]);
-    }
-    printf("\n");
+    imprime(buf, res);
 }
+
 
 int stuffing(char* buf, int size){
     if((!buf)||(size<0)) return -1;
@@ -95,4 +94,46 @@ int destuffing(char* buf, int size){
         }
     }
     return size;
+}
+
+int setupFrameFormat(char* buf, int size){
+    if((!buf)||(size<0)) return -1;
+    char frame[TAM_MAX];
+    frame[0] = FLAG;
+    frame[1] = A_1;
+    frame[2] = C;
+    frame[3] = BCC_1;
+    for(int i = 0; i < size; i++){
+        frame[i+4] = buf[i];
+    }
+    frame[size + 4] = BCC_2;
+    frame[size + 5] = FLAG;
+
+    imprime(frame, size+6);
+    return size+6;
+}
+
+
+int resetFrameFormat(char* buf, int size){
+    if((!buf)||(size<0)) return -1;
+    /* Tirar a FLAG, A, C, BCC do inicio do buf */
+    for(int i = 0; i < size; i++){
+        buf[i] = buf[i+4];
+    }
+    size - 4;
+    /* Tirar o final da */
+    size - 2;
+
+    return size;
+}
+
+
+void imprime(char* buf, int size){
+    if((!buf)||(size < 0)) return;
+    printf("Init_Hex:");
+    for(int i = 0; i < size; i++){
+        printf(" 0x%02X ", buf[i]);
+    }
+    printf("\n");
+    return;
 }
