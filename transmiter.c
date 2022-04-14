@@ -77,7 +77,7 @@ int llopen_transmiter(linkLayer connectionParameters, int fd){
             else STATE = STATE0;
             break;
         case (STATE2):
-            if(AUX_1 == C) STATE = STATE3;
+            if(AUX_1 == C) STATE = STATE3; 
             else if(AUX_1 == FLAG) STATE = STATE1;
             else STATE = STATE0;
             break;
@@ -97,6 +97,7 @@ int llopen_transmiter(linkLayer connectionParameters, int fd){
         STOP = TRUE;
         para = 1;
         contador = 0;
+        alarm(0);
       }
     }
 
