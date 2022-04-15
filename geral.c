@@ -15,7 +15,7 @@ int setupSerialTerminal(linkLayer connectionParameters){
     }
 
     bzero(&newtio, sizeof(newtio));
-    newtio.c_cflag = connectionParameters.baudRate | CS8 | CLOCAL | CREAD;
+    newtio.c_cflag = convertBaudRate(connectionParameters.baudRate) | CS8 | CLOCAL | CREAD;
     newtio.c_iflag = IGNPAR;
     newtio.c_oflag = 0;
 
@@ -62,7 +62,8 @@ int setupFrameFormat(char* buf, char* frame, int bufSize){
       for(int i = 0; i < bufSize; i++){
           frame[i+4] = buf[i];
       }
-      frame[bufSize + 4] = BCC_2;
+      char BCC2 = calculaBCC(frame, bufSize+4);
+      frame[bufSize + 4] = BCC2;
       frame[bufSize + 5] = FLAG;
 
       //imprime(frame, size+6);
@@ -151,15 +152,58 @@ int destuffing(char* buf, int bufSize){
   return bufSize;
 }
 
-int baudRateConvert(int baud){
-  switch (baud)
-  {
-  case 9600:
-    return B9600;
-    break;
-  }
-  return -1;
+
+speed_t convertBaudRate(int baud){
+    switch (baud) {
+    case 9600:
+        return B9600;
+    case 19200:
+        return B19200;
+    case 38400:
+        return B38400;
+    case 57600:
+        return B57600;
+    case 115200:
+        return B115200;
+    case 230400:
+        return B230400;
+    case 460800:
+        return B460800;
+    case 500000:
+        return B500000;
+    case 576000:
+        return B576000;
+    case 921600:
+        return B921600;
+    case 1000000:
+        return B1000000;
+    case 1152000:
+        return B1152000;
+    case 1500000:
+        return B1500000;
+    case 2000000:
+        return B2000000;
+    case 2500000:
+        return B2500000;
+    case 3000000:
+        return B3000000;
+    case 3500000:
+        return B3500000;
+    case 4000000:
+        return B4000000;
+    default: 
+        return -1;
+    }
 }
+
+char calculaBCC(char* frame, int frameSize){
+  //if((!frame)||(frameSize<0)) return NULL;
+  char BCC;
+  /*codido*/ //cascata de XOR's
+  BCC = BCC_2;
+  return BCC;
+}
+
 
 void imprime(char* buf, int bufSize){
   if((!buf)||(bufSize<0)) return;

@@ -6,12 +6,18 @@
 #define A_1 0x03 // A_tx
 #define A_2 0x01 // A_rx
 
-#define BCC_1 A_1^C
-#define BCC_2 A_2^C
+#define BCC_1 (A_1^C)
+#define BCC_2 (A_2^C)
+
+#define BCC_DISC_tx (A_1^C_DISC)
+#define BCC_DISC_rx (A_2^C_DISC)
+
 #define C 0x03
+#define C_SET 0x03
 #define C_DISC 0x0b
 #define C_UA 0x07
 
+#define C_random 0x04
 //#define C_RR 0x00
 //#define C_REJ 0x00
 
