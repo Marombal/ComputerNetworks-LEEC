@@ -15,5 +15,6 @@ int destuffing(char* buf, int bufSize);
 speed_t convertBaudRate(int baud);
 void imprime(char* buf, int bufSize);
 char calculaBCC(char* frame, int frameSize);
+void Statistics();
 
 #endif

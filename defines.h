@@ -33,4 +33,13 @@
 #define STATE4 4 // BCC OK
 #define STATE5 5 // STOP
 
+
+typedef struct stats{
+    char serialPort[100][1000];
+    int num_retransmitted_frames;
+    int num_received_frames;
+    int num_timouts;
+    int num_REJ;
+} stats;
+
 #endif

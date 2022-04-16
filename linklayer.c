@@ -12,6 +12,8 @@ static int numTries_Transmiter, timeOut_Transmiter;
 static int TYPE; // TYPE = 0 (TX) | TYPE = 1 (RX)
 int timeouts = 0, flag_ = 1;
 
+struct stats stats_;
+
 
 void timeout_()                   // atende alarme
 {
@@ -117,7 +119,7 @@ int llwrite(char* buf, int bufSize){
     int error = 0;
     char REJ[] = {FLAG, A_1, C_random, BCC_1, FLAG};
     char RR[] = {FLAG, A_1, C_random, BCC_1, FLAG}; //MAL OS COISOS
-    //imprime(answer, i);
+    imprime(answer, i);
     for(int h = 0; h < 5; h++){
         if(answer[h]!=RR[h]) error = 1;
     }
@@ -162,7 +164,7 @@ int llread(char* packet){
     int ready = 1; //ready = -1 quando ocorreu um erro e é suposto enviar um reject; = 1 quando está tudo bem
     // por fazer
 
-    //sleep(15); //maybe not necessario
+    sleep(15); //maybe not necessario
     /* Envia a resposta */
     if(ready == -1){
         //REJ
@@ -182,6 +184,7 @@ int llread(char* packet){
 }
 // Closes previously opened connection; if showStatistics==TRUE, link layer should print statistics in the console on close
 int llclose(int showStatistics){
+
     if(TYPE == RECEIVER){
         //... abre como receiver
         //return llclose_receiver(); 
@@ -191,11 +194,19 @@ int llclose(int showStatistics){
         }
         sleep(1);
         close(fd);
+        if(showStatistics)  Statistics();
         return 1;
     }
     if(TYPE == TRANSMITTER){
         //... abre como transmiter
         //return llclose_transmiter();
+        if ( tcsetattr(fd,TCSANOW,&oldtio) == -1) {
+        perror("tcsetattr");
+        exit(-1);
+        }
+        sleep(1);
+        close(fd);
+        return 1;
 
     }
     return -1;

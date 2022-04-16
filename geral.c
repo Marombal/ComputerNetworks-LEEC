@@ -204,6 +204,18 @@ char calculaBCC(char* frame, int frameSize){
   return BCC;
 }
 
+void Statistics(){
+  printf("\n\n");
+  printf("/**************************************************************************************/");
+  printf("/**************************************Statistics**************************************/");
+  printf("/**************************************************************************************/");
+  //STATS
+
+  //
+  printf("\n\n");
+  return;
+}
+
 
 void imprime(char* buf, int bufSize){
   if((!buf)||(bufSize<0)) return;
