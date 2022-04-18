@@ -18,6 +18,7 @@
 #define C_UA 0x07
 
 #define C_random 0x04
+#define C_random1 0x05
 //#define C_RR 0x00
 //#define C_REJ 0x00
 
@@ -36,8 +37,9 @@
 
 typedef struct stats{
     char serialPort[100][1000];
-    int num_retransmitted_frames;
-    int num_received_frames;
+    int num_frames;
+    int num_bytes;
+    int num_databytes;
     int num_timouts;
     int num_REJ;
 } stats;

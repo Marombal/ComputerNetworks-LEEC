@@ -6,6 +6,7 @@
 
 static struct termios oldtio, newtio;
 
+
 int setupSerialTerminal(linkLayer connectionParameters);
 int closeSerialTerminal(int fd);
 int setupFrameFormat(char* buf, char* frame, int bufSize);
@@ -15,6 +16,9 @@ int destuffing(char* buf, int bufSize);
 speed_t convertBaudRate(int baud);
 void imprime(char* buf, int bufSize);
 char calculaBCC(char* frame, int frameSize);
-void Statistics();
+void Statistics(stats tats_);
+int compara(char* vetor1, char* vetor2, int size);
+int verificaBCC(char* frame, int frameSize);
+void resetStats(stats stats_);
 
 #endif

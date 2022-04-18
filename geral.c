@@ -44,9 +44,11 @@ int closeSerialTerminal(int fd){
     perror("tcsetattr");
     exit(-1);
   }
+  sleep(1);
   close(fd);
   return 1;
 }
+      
 
 /*
 *Function:
@@ -54,7 +56,8 @@ int closeSerialTerminal(int fd){
 */
 int setupFrameFormat(char* buf, char* frame, int bufSize){
   if((!buf)||(bufSize<0)) return -1;
-      
+  char BCC2 = calculaBCC(buf, bufSize);
+
       frame[0] = FLAG;
       frame[1] = A_1;
       frame[2] = C;
@@ -62,12 +65,12 @@ int setupFrameFormat(char* buf, char* frame, int bufSize){
       for(int i = 0; i < bufSize; i++){
           frame[i+4] = buf[i];
       }
-      char BCC2 = calculaBCC(frame, bufSize+4);
+      
       frame[bufSize + 4] = BCC2;
       frame[bufSize + 5] = FLAG;
 
       //imprime(frame, size+6);
-      return bufSize+6;
+      return bufSize+6; /// MUITO CUIDADO
 }
 
 /*
@@ -93,7 +96,7 @@ int stuffing(char* buf, int bufSize){
     
     char aux1, aux2;
 
-    for(int i = 3; i < bufSize-2; i++){
+    for(int i = 3; i < bufSize-1; i++){
         if(buf[i] == ESC){
             bufSize++;
             aux1 = buf[i+1];
@@ -106,7 +109,7 @@ int stuffing(char* buf, int bufSize){
         }
     }
 
-    for(int i = 3; i<bufSize-2; i++){
+    for(int i = 3; i<bufSize-1; i++){
         if(buf[i] == FLAG){
             buf[i]=ESC;
             bufSize++;
@@ -198,25 +201,67 @@ speed_t convertBaudRate(int baud){
 
 char calculaBCC(char* frame, int frameSize){
   //if((!frame)||(frameSize<0)) return NULL;
-  char BCC;
-  /*codido*/ //cascata de XOR's
-  BCC = BCC_2;
-  return BCC;
+  char BCC2 = 0x00;
+  for(int k = 0; k < frameSize; k++){
+    BCC2 ^= frame[k];
+    
+  }
+  //printf("0x%02x\n", BCC2);
+  //if(BCC2 == FLAG) return BCC_2;
+  return BCC2;
 }
 
-void Statistics(){
-  printf("\n\n");
-  printf("/**************************************************************************************/");
-  printf("/**************************************Statistics**************************************/");
-  printf("/**************************************************************************************/");
-  //STATS
+/*
+* Função: Verificar se o BCC da frame está correto
+* Return: 1 no caso de estar correto, -1 caso contrario
+*/
+int verificaBCC(char* frame, int frameSize){
+  if((!frame)||(frameSize)) return -1;
+  /* calcula BCC */
+  
+  return 1;
+}
 
+void Statistics(stats stats_){
+  printf("\n\n");
+  printf("/********************************************************************/\n");
+  printf("/*****************************Statistics*****************************/\n");
+  printf("/********************************************************************/\n");
+  printf("\n");
+  //STATS
+  printf("Number of received/trasmitted frames: %d\n", stats_.num_frames);
+  printf("Number of received/trasmitted BYTES -> Total: %d (%d of data/%d of overhead)\n", stats_.num_bytes, stats_.num_databytes, stats_.num_bytes-stats_.num_databytes);
+  printf("Number of REJ: %d\n", stats_.num_REJ);
+  printf("Number of timeouts: %d\n", stats_.num_timouts);
   //
   printf("\n\n");
   return;
 }
 
+/*
+* Funcao: Comparar 2 vetores
+* Return: -1 em caso de erro; 0 se forem diferentes, 1 se forem iguais
+*/
+int compara(char* vetor1, char* vetor2, int size){
+  if((!vetor1)||(!vetor2)||(size < 0)) return -1;
 
+  for(int h = 0; h < size; h++){
+        if(vetor1[h]!=vetor2[h]) return 0;
+  }
+  return 1;
+}
+
+void resetStats(stats stats_){
+  stats_.num_REJ = 0;
+  stats_.num_timouts = 0;
+  stats_.num_frames = 0;
+  stats_.num_bytes = 0;
+  stats_.num_databytes = 0;
+}
+
+/*
+* Funcao: Imprimir no formato hexadecimal o conteudo do parametro "buf"
+*/
 void imprime(char* buf, int bufSize){
   if((!buf)||(bufSize<0)) return;
   for(int i = 0; i < bufSize; i++){
