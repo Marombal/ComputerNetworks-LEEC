@@ -65,7 +65,7 @@ int llwrite(char* buf, int bufSize){
     /* Reeniciar timeouts */
     timeouts = 0, flag_ = 1;
 
-    char frame[MAX_PAYLOAD_SIZE*2];  /*frame auxiliar*/
+    char frame[7+2+MAX_PAYLOAD_SIZE*2];  /*frame auxiliar*/
     int error = 0;
     int STOP = FALSE, count = 0, i = 0, flag_encontrada = 0, bufSize_aux, STATE = 0;
     char answer[5], AUX_1;
