@@ -19,8 +19,12 @@
 
 #define C_random 0x04
 #define C_random1 0x05
-//#define C_RR 0x00
-//#define C_REJ 0x00
+#define C_S0 0x00
+#define C_S1 0x02
+#define C_RR0 0x01
+#define C_RR1 0x21
+#define C_REJ0 0x05
+#define C_REJ1 0x25
 
 #define ESC 0x7D
 
@@ -33,6 +37,10 @@
 #define STATE3 3 // C RCV
 #define STATE4 4 // BCC OK
 #define STATE5 5 // STOP
+// para maquinas mais avançadas
+#define STATE6 6
+#define STATE7 7
+#define STATE8 8
 
 
 typedef struct stats{

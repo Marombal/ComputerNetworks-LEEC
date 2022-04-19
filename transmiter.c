@@ -100,7 +100,7 @@ int llopen_transmiter(linkLayer connectionParameters, int fd){
         alarm(0);
       }
     }
-
+    //tcflush(fd, TCIOFLUSH);
     if(n_timeouts>=connectionParameters.numTries){
       printf("Failed to start conection...\n");
       return -1;

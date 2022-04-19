@@ -22,7 +22,7 @@ int setupSerialTerminal(linkLayer connectionParameters){
     /* set input mode (non-canonical, no echo,...) */
     newtio.c_lflag = 0;
 
-    newtio.c_cc[VTIME]    = 30;   /* inter-character timer unused */
+    newtio.c_cc[VTIME]    = 0;   /* inter-character timer unused */
     newtio.c_cc[VMIN]     = 0;   /* blocking read until 5 chars received */
 
     tcflush(fd, TCIOFLUSH);
@@ -257,6 +257,21 @@ void resetStats(stats stats_){
   stats_.num_frames = 0;
   stats_.num_bytes = 0;
   stats_.num_databytes = 0;
+}
+
+char toggleNs(char Ns){
+  if(Ns == C_S0) return C_S1;
+  else return C_S0;
+}
+
+char toggleRR(char Nr){
+  if(Nr == C_RR0) return C_RR1;
+  else return C_RR0;
+}
+
+char toggleREJ(char Nr){
+  if(Nr == C_REJ0) return C_REJ1;
+  else return C_REJ0;
 }
 
 /*

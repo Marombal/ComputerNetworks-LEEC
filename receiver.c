@@ -68,7 +68,7 @@ int llopen_receiver(linkLayer connectionParameters, int fd){
     printf("SET (Recebido): (0x%02X)(0x%02X)(0x%02X)(0x%02X)(0x%02X)\n", AUX[0], AUX[1], AUX[2], AUX[3], AUX[4]);
 
     /* Envio do UA de modo a confirmar a receção do SET */
-    //sleep(35); // <--- tests
+    //sleep(4); // <--- tests
     res = write(fd, UA, 5);
     printf("UA (enviado): (0x%02X)(0x%02X)(0x%02X)(0x%02X)(0x%02X)\n", UA[0], UA[1], UA[2], UA[3], UA[4]);
 

@@ -104,7 +104,7 @@ int main(int argc, char *argv[]) {
                 ll.role = 1;
                 ll.baudRate = 9600;
                 ll.numTries = 3;
-                ll.timeOut = 5;
+                ll.timeOut = 3;
 
                 if(llopen(ll)==-1) {
                         fprintf(stderr, "Could not initialize link layer connection\n");
@@ -139,7 +139,7 @@ int main(int argc, char *argv[]) {
                         		        break;
               	  	        	}
                         		total_bytes = total_bytes + write_result;
-					printf("read from file -> write to link layer, %d %d %d\n", bytes_read, write_result, total_bytes);//sleep(1000);
+					printf("read from file -> write to link layer, %d %d %d\n", bytes_read, write_result, total_bytes);
 				}
 				else if (buffer[0] == 0) {
 					printf("App layer: done receiving file\n");
