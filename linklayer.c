@@ -14,7 +14,7 @@ int timeouts = 0, flag_ = 1, conta = 0;
 int func; // func = 0 on llopen; = 1 on llwrite/llread; = 2 on llclose
 char Ns = C_S0;
 
-static int x1 = 1; // for deb proposes
+static int x1 = 5; // for deb proposes
 
 static struct stats stats_;
 
@@ -23,7 +23,7 @@ void timeout_()                   // atende alarme
 	printf("timeout: #%d...\n", (timeouts+1));
 	flag_ = 1;
 	timeouts++;
-    stats_.num_timouts++;
+    if(conta) stats_.num_timouts++;
 }
 
 // Opens a conection using the "port" parameters defined in struct linkLayer, returns "-1" on error and "1" on sucess
@@ -190,9 +190,11 @@ int llwrite(char* buf, int bufSize){
             res = write(fd, frame, new_bufSize);    // send all the frame again   
             if(res == -1) return -1;
             printf("Reenvio devido ao REJ\n");
+            timeouts++;
             stats_.num_frames++;
             stats_.num_bytes += new_bufSize;
             stats_.num_databytes += bufSize;
+            stats_.num_REJ++;
             STATE = STATE0;
             break;
         }
@@ -232,8 +234,7 @@ int llread(char* packet){
     //printf("inicio while\n");
     while (STOP==FALSE) /* loop for input */ 
     {   
-        res = read(fd, &AUX_1, 1); //printf("0x%02x - %d ", AUX_1, packetSize);
-        //if(AUX_1 == FLAG) printf("FLAG\n");
+        res = read(fd, &AUX_1, 1);
         packet[packetSize] = AUX_1;
         switch (STATE)
         {
@@ -318,16 +319,18 @@ int llread(char* packet){
             packetSize = destuffing(packet, packetSize);
             if(packetSize == -1) return -1;
 
-            if(x1){
-                printf("hehehehe\n");
-                x1 = 0;
+            /*if(x1){
+                //printf("hehehehe\n");
+                x1 --;
                 packet[10] = 0x32;
-            }
+            }*/
                 
+                // Atualiza as estatisticas
+            stats_.num_frames++;
+            stats_.num_databytes+=packetSize;
+            stats_.num_bytes+=packetSize_aux;   
+
             if(calculaBCC(packet, packetSize) == BCC_Check){    //caso em que recebeu tudo direitinho calculaBCC(packet, packetSize) == BCC_Check (debugging propose)
-                stats_.num_frames++;
-                stats_.num_databytes+=packetSize;
-                stats_.num_bytes+=packetSize_aux;
                 //printf("Everything seems cool :) Sending ACK...\n");
                 //envia RR a confirmar que está pronto a receber o proximo pacote
                 if(C_Check == C_S0) res = write(fd, RR1, 5); 
@@ -344,7 +347,7 @@ int llread(char* packet){
                 if(res == -1)   return -1;
                 STATE = STATE0;
                 packetSize = 0;
-                
+                stats_.num_REJ++;
             }
             STOP = TRUE;
             break;
@@ -369,13 +372,12 @@ int llclose(int showStatistics){
         int res, STOP = FALSE, STATE = 0, error = 0;
         char AUX[5], AUX_1;
 
-
         char UA[] = {FLAG, A_1, C_UA, BCC_2, FLAG}; // Definição do UA segundo o protocolo
         char DISC_rx[] = {FLAG, A_2, C_DISC, (A_2^C_DISC), FLAG};
 
         while(STOP == FALSE){
 
-            if(timeouts < numTries_Receiver){
+            /*if(timeouts < numTries_Receiver){
                 if(flag_){
                     alarm(timeOut_Receiver);
                     flag_ = 0;
@@ -386,7 +388,7 @@ int llclose(int showStatistics){
                 STOP = TRUE; 
                 error = 1;
                 break;
-            }
+            }*/
             res = read(fd, &AUX_1, 1); //printf("0x%02x STATE: %d\n", AUX_1, STATE);
             AUX[STATE] = AUX_1;
             switch (STATE)
@@ -418,13 +420,13 @@ int llclose(int showStatistics){
 
             if(STATE == STATE5) STOP = TRUE;
         }
-        alarm(0);
+        /*alarm(0);
 
         if(error){
             printf("DISC NOT FOUND\n");
             return -1;
         } 
-        
+        */
             printf("DISC (recebido): (0x%02X)(0x%02X)(0x%02X)(0x%02X)(0x%02X)\n", AUX[0], AUX[1], AUX[2], AUX[3], AUX[4]);
 
         //Envia DISC
@@ -438,7 +440,7 @@ int llclose(int showStatistics){
         STOP = FALSE, STATE = 0, timeouts = 0, flag_ = 1;
         while(STOP == FALSE){
 
-            if(timeouts < numTries_Receiver){
+            /*if(timeouts < numTries_Receiver){
                 if(flag_){
                     alarm(timeOut_Receiver);
                     flag_ = 0;
@@ -453,7 +455,7 @@ int llclose(int showStatistics){
                 STOP = TRUE; 
                 error = 1;
                 break;
-            }
+            }*/
             res = read(fd, &AUX_1, 1);
             AUX[STATE] = AUX_1;
             switch (STATE)
@@ -485,11 +487,11 @@ int llclose(int showStatistics){
 
             if(STATE == STATE5) STOP = TRUE;
         }
-        alarm(0);
+        /*alarm(0);
         if(error){
             printf("UA NOT FOUND\n");
             return -1;
-        } 
+        } */
         printf("UA (recebido): (0x%02X)(0x%02X)(0x%02X)(0x%02X)(0x%02X)\n", AUX[0], AUX[1], AUX[2], AUX[3], AUX[4]);
 
         //mata-se
