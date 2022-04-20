@@ -465,7 +465,7 @@ int llclose(int showStatistics){
                 else STATE = STATE0;
                 break;
             case(STATE1):
-                if(AUX_1 == A_1) STATE = STATE2;
+                if(AUX_1 == A_2) STATE = STATE2;
                 else if(AUX_1 == FLAG) STATE = STATE1;
                 else STATE = STATE0;
                 break;
@@ -475,7 +475,7 @@ int llclose(int showStatistics){
                 else STATE = STATE0;
                 break;
             case(STATE3):
-                if(AUX_1 == (A_1^C_UA)) STATE = STATE4;
+                if(AUX_1 == (A_2^C_UA)) STATE = STATE4;
                 else if(AUX_1 == FLAG) STATE = STATE1;
                 else STATE = STATE0;
                 break;
@@ -506,7 +506,7 @@ int llclose(int showStatistics){
         char AUX[5], AUX_1;
 
 
-        char UA[] = {FLAG, A_1, C_UA, (C_UA^A_1), FLAG}; // Definição do UA segundo o protocolo
+        char UA[] = {FLAG, A_2, C_UA, (C_UA^A_2), FLAG}; // Definição do UA segundo o protocolo
         char DISC_tx[] = {FLAG, A_1, C_DISC, (A_1^C_DISC), FLAG};
         //Envia DISC
         //sleep(5); // <-- Testes
