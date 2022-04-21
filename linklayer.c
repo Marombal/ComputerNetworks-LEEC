@@ -14,7 +14,7 @@ int timeouts = 0, flag_ = 1, conta = 0;
 int func; // func = 0 on llopen; = 1 on llwrite/llread; = 2 on llclose
 char Ns = C_S0;
 
-static int x1 = 5; // for deb proposes
+static int x1 = 85; // for deb proposes
 
 static struct stats stats_;
 
@@ -214,7 +214,6 @@ int llwrite(char* buf, int bufSize){
 int llread(char* packet){
     // controlo dos parametros
     if(!packet) return -1;
-
     /* Reeniciar timeouts */
     timeouts = 0;
         
