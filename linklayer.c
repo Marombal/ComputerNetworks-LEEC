@@ -14,7 +14,7 @@ int timeouts = 0, flag_ = 1, conta = 0;
 int func; // func = 0 on llopen; = 1 on llwrite/llread; = 2 on llclose
 char Ns = C_S0;
 
-static int x1 = 85; // for deb proposes
+static int x1 = 2; // for deb proposes
 
 static struct stats stats_;
 
@@ -132,9 +132,10 @@ int llwrite(char* buf, int bufSize){
             error = 1;
             STOP = TRUE;
         }
-
+            
         res = read(fd, &AUX_1, 1);
         if(res == -1) return -1;
+        //printf("li %02x\n", AUX_1);
         answer[STATE] = AUX_1;
         switch (STATE)
         {
@@ -174,7 +175,6 @@ int llwrite(char* buf, int bufSize){
             STOP = TRUE;
             Ns = toggleNs(Ns);
             break;
-
         case STATE6:
             if(AUX_1 == FLAG) STATE = STATE1;
             else if((AUX_1 == (C_REJ0^A_1))||(AUX_1 == (C_REJ1^A_1))) STATE = STATE7;
@@ -189,7 +189,7 @@ int llwrite(char* buf, int bufSize){
             alarm(0);
             res = write(fd, frame, new_bufSize);    // send all the frame again   
             if(res == -1) return -1;
-            printf("Reenvio devido ao REJ\n");
+            printf("REJ Recebido! A reenviar pacote \n");
             timeouts++;
             stats_.num_frames++;
             stats_.num_bytes += new_bufSize;
@@ -198,6 +198,13 @@ int llwrite(char* buf, int bufSize){
             STATE = STATE0;
             break;
         }
+        
+        //printf("STATE: %d . AUX: %02x\n", STATE, AUX_1);
+        if(STATE == STATE5) {
+            Ns = toggleNs(Ns);
+            break;
+        }
+        
         
     }
     alarm(0);
@@ -214,6 +221,7 @@ int llwrite(char* buf, int bufSize){
 int llread(char* packet){
     // controlo dos parametros
     if(!packet) return -1;
+
     /* Reeniciar timeouts */
     timeouts = 0;
         
@@ -279,6 +287,7 @@ int llread(char* packet){
                 packetSize = 3;
                 STATE = STATE3;
                 if(AUX_1 == toggleNs(Ns)){
+                    printf("PACOTE REPETIDO DETETADO. A REENVIAR RR\n");
                     if(AUX_1 == C_S0) res = write(fd, RR1, 5);
                     else if(AUX_1 == C_S1) res = write(fd, RR0, 5);
                     packetSize = 0;
