@@ -44,7 +44,6 @@
 
 
 typedef struct stats{
-    char serialPort[100][1000];
     int num_frames;
     int num_bytes;
     int num_databytes;

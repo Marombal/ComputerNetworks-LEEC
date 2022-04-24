@@ -200,26 +200,12 @@ speed_t convertBaudRate(int baud){
 }
 
 char calculaBCC(char* frame, int frameSize){
-  //if((!frame)||(frameSize<0)) return NULL;
   char BCC2 = 0x00;
   for(int k = 0; k < frameSize; k++){
     BCC2 ^= frame[k];
     
   }
-  //printf("0x%02x\n", BCC2);
-  //if(BCC2 == FLAG) return BCC_2;
   return BCC2;
-}
-
-/*
-* Função: Verificar se o BCC da frame está correto
-* Return: 1 no caso de estar correto, -1 caso contrario
-*/
-int verificaBCC(char* frame, int frameSize){
-  if((!frame)||(frameSize)) return -1;
-  /* calcula BCC */
-  
-  return 1;
 }
 
 void Statistics(stats stats_){
@@ -238,18 +224,6 @@ void Statistics(stats stats_){
   return;
 }
 
-/*
-* Funcao: Comparar 2 vetores
-* Return: -1 em caso de erro; 0 se forem diferentes, 1 se forem iguais
-*/
-int compara(char* vetor1, char* vetor2, int size){
-  if((!vetor1)||(!vetor2)||(size < 0)) return -1;
-
-  for(int h = 0; h < size; h++){
-        if(vetor1[h]!=vetor2[h]) return 0;
-  }
-  return 1;
-}
 
 void resetStats(stats stats_){
   stats_.num_REJ = 0;
@@ -262,16 +236,6 @@ void resetStats(stats stats_){
 char toggleNs(char Ns){
   if(Ns == C_S0) return C_S1;
   else return C_S0;
-}
-
-char toggleRR(char Nr){
-  if(Nr == C_RR0) return C_RR1;
-  else return C_RR0;
-}
-
-char toggleREJ(char Nr){
-  if(Nr == C_REJ0) return C_REJ1;
-  else return C_REJ0;
 }
 
 /*

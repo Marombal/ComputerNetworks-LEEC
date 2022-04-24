@@ -1,8 +1,5 @@
 #include "transmiter.h"
 
-
-//volatile int STOP=FALSE;
-
 int n_timeouts=0, flag=1;
 void timeout()                   // atende alarme
 {
@@ -25,7 +22,6 @@ int llopen_transmiter(linkLayer connectionParameters, int fd){
     int STOP=FALSE;
     /* Envio do set atravez da função write */
     res = write(fd,SET,5); 
-    //printf("%d bytes written\n", res);
     printf("SET (enviado): (0x%02X)(0x%02X)(0x%02X)(0x%02X)(0x%02X)\n", SET[0], SET[1], SET[2], SET[3], SET[4]);
  
     /*
@@ -35,6 +31,7 @@ int llopen_transmiter(linkLayer connectionParameters, int fd){
       para - para determinar o fim da mensagem (na segunda flag)
       AUX - vetor onde se guardara a mensagem
       AUX_1 - onde se vai guardar a leitura que é feita 1 de cada vez
+
     */
 
     int aux = 0, para = 0;
@@ -51,8 +48,7 @@ int llopen_transmiter(linkLayer connectionParameters, int fd){
           flag = 0;
           
           if(n_timeouts!=0){           // after 1st timeout
-            res = write(fd,SET,5);    // send SET again
-            //printf("Reenvio #%d\n", n_timeouts); 
+            res = write(fd,SET,5);    // send SET again 
           }
         }
       }
@@ -100,7 +96,6 @@ int llopen_transmiter(linkLayer connectionParameters, int fd){
         alarm(0);
       }
     }
-    //tcflush(fd, TCIOFLUSH);
     if(n_timeouts>=connectionParameters.numTries){
       printf("Failed to start conection...\n");
       return -1;
@@ -113,11 +108,3 @@ int llopen_transmiter(linkLayer connectionParameters, int fd){
     // ERRO
     return -1;
 }
-/*
-*Function: Closes the communication as transmiter
-*Return: returns 1 on sucess, -1 on error
-*/
-int llclose_transmiter(linkLayer connectionParameters){
-    return -1;
-}
-// NAO SEI QUAIS SERAO OS PARAMETROS NECESSARIOS

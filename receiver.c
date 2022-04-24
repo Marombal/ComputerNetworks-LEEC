@@ -1,7 +1,5 @@
 #include "receiver.h"
 
-//printf("hey\n");
-//volatile int STOP=FALSE;
 /*
 *Function: Opens the channel to communicate as receiver
 *Return: returns 1 on sucess, -1 on error
@@ -9,17 +7,12 @@
 int llopen_receiver(linkLayer connectionParameters, int fd){
     // NONCANONICAL
 
-    //int fd = funcao_que_cria_fd(connectionParameters);
-    unsigned char UA[] = {FLAG, A_2, C, BCC_2, FLAG}; // Definição do UA segundo o protocolo
-    
+    unsigned char UA[] = {FLAG, A_2, C, BCC_2, FLAG}; // Definição do UA segundo o protocolo    
     int res;
-
     int STOP = FALSE;
-
     int STATE = 0;
     /*
       ### Variaveis auxiliares ao while ###
-
       aux - para determinar o indice do vetor 
       para - para determinar o fim da mensagem (na segunda flag)
       AUX - vetor onde se guardara a mensagem
@@ -75,14 +68,3 @@ int llopen_receiver(linkLayer connectionParameters, int fd){
 
     return 1;
 }
-/*
-*Function: Closes the communication as receiver
-*Return: returns 1 on sucess, -1 on error
-*/
-int llclose_receiver(linkLayer connectionParameters){
-
-    unsigned char DISC[] = {FLAG, A_2, C, BCC_2, FLAG};  //mal
-    unsigned char UA[] = {FLAG, A_2, C, BCC_2, FLAG};   //mal
-    return -1;
-}
-// NAO SEI QUAIS SERAO OS PARAMETROS NECESSARIOS
