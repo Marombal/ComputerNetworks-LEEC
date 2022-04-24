@@ -59,7 +59,7 @@ int llopen(linkLayer connectionParameters){
 int llwrite(char* buf, int bufSize){
     // controlo dos parametros
     if((!buf)||(bufSize<0)||(bufSize>MAX_PAYLOAD_SIZE)) return -1;
-        
+
     conta = 1;  //  PARA AS ESTATISTICAS
         //sleep(1);
     /* Reeniciar timeouts */
@@ -110,7 +110,8 @@ int llwrite(char* buf, int bufSize){
     /* Listen to Receiver's answer */
     //printf("Now im waiting ur answer \n");
     (void) signal(SIGALRM, timeout_);
-
+    int ciclo = 1;
+    alarm(0);
     while (STOP==FALSE) /* loop for input */ 
     {   
         if(timeouts < numTries_Transmiter){
@@ -121,6 +122,7 @@ int llwrite(char* buf, int bufSize){
                     //printf("Sending again due to timeout. \n");
                     res = write(fd, frame, new_bufSize);    // send all the frame again   
                     if(res == -1) return -1;
+                    //printf("reenvio\n");
                     stats_.num_frames++;
                     stats_.num_bytes += new_bufSize;
                     stats_.num_databytes += bufSize;
@@ -133,9 +135,12 @@ int llwrite(char* buf, int bufSize){
             STOP = TRUE;
         }
             
-        res = read(fd, &AUX_1, 1);
+        res = read(fd, &AUX_1, 1);//printf("read: %02x\n", AUX_1);
         if(res == -1) return -1;
-        //printf("li %02x\n", AUX_1);
+        if(res == 0){
+            //printf("Timeout\n");
+        }
+        
         answer[STATE] = AUX_1;
         switch (STATE)
         {
@@ -185,7 +190,7 @@ int llwrite(char* buf, int bufSize){
             else STATE = STATE0; 
             break;
         case STATE8:
-            //Recebeu um REJ. Reevia e volta ao estado 0
+            //Recebeu um REJ. Reevia e volta ao estado 
             alarm(0);
             res = write(fd, frame, new_bufSize);    // send all the frame again   
             if(res == -1) return -1;
@@ -201,6 +206,7 @@ int llwrite(char* buf, int bufSize){
         
         //printf("STATE: %d . AUX: %02x\n", STATE, AUX_1);
         if(STATE == STATE5) {
+            printf("RR Recebido\n");
             Ns = toggleNs(Ns);
             break;
         }
@@ -237,11 +243,16 @@ int llread(char* packet){
 
     /**/
     (void) signal(SIGALRM, timeout_);
-        
-    //printf("inicio while\n");
+
     while (STOP==FALSE) /* loop for input */ 
     {   
-        res = read(fd, &AUX_1, 1);
+        if(STATE!=STATE5)
+            res = read(fd, &AUX_1, 1);
+        //printf(" %02x ", AUX_1);
+        if(res == -1)   return -1;
+        if(res == 0){
+            printf("timeout\n");
+        }
         packet[packetSize] = AUX_1;
         switch (STATE)
         {
@@ -316,8 +327,8 @@ int llread(char* packet){
                 STATE = STATE0;
             }
             break;
-        
         case STATE5:
+            //printf(" li\n");
             C_Check = packet[2];
             BCC_Check = packet[packetSize-2];
             packetSize_aux = packetSize;
@@ -339,7 +350,7 @@ int llread(char* packet){
             stats_.num_bytes+=packetSize_aux;   
 
             if(calculaBCC(packet, packetSize) == BCC_Check){    //caso em que recebeu tudo direitinho calculaBCC(packet, packetSize) == BCC_Check (debugging propose)
-                //printf("Everything seems cool :) Sending ACK...\n");
+                printf("Everything seems cool :) Sending ACK...\n");
                 //envia RR a confirmar que está pronto a receber o proximo pacote
                 if(C_Check == C_S0) res = write(fd, RR1, 5); 
                 else if(C_Check == C_S1) res = write(fd, RR0, 5);
@@ -349,7 +360,7 @@ int llread(char* packet){
             }
             else{
                 //caso em que identificou que o pacote veio danificado
-                //printf("Something went wrong here :( Sending REJ...\n");
+                printf("Something went wrong here :( Sending REJ...\n");
                 if(C_Check == C_S0) res = write(fd, REJ0, 5);
                 else if(C_Check == C_S1) res = write(fd, REJ1, 5);
                 if(res == -1)   return -1;
